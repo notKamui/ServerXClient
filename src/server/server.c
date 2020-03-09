@@ -45,7 +45,12 @@ int createConnection(int serverSocket, struct sockaddr* sa) {
 }
 
 int sendMess(int socket, char* query) {
-	int nb = send(socket, query, strlen(query)+1, 0);
+    int len = strlen(query);
+    char* mess = (char*)malloc((len+2)*sizeof(char));
+    strcpy(mess, query);
+    mess[len] = '\n';
+    mess[len+1] = '\0';
+	int nb = send(socket, mess, strlen(mess)+1, 0);
 	if (nb == -1) {
 		printf("Error : couldn't make request\n");
 	} else {
@@ -96,12 +101,13 @@ void* threadFunction(void* args) {
 			if(streq(mess, "x")) {
 				break;
 			}
+			printf("Received '%s'\n", mess);
 			echo(targs.socket, mess);
-			printf("Received '%s'", mess);
+			mess = '\0';
 		}
 	}
 
-	printf("Closing connection");
+	printf("Closing connection\n");
 
 	close(targs.socket);
 	pthread_exit(NULL);
